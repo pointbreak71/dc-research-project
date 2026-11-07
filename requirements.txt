@@ -1,0 +1,2 @@
+# Add packages as you go. Course homework used notebooks; start light.
+python-dotenv
