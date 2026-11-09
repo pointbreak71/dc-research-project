@@ -1,6 +1,6 @@
 """Write the base-case CSVs for the 15.S09 proposal model (section 7 of "15.S09 proposal").
 
-Sourced values come straight from the proposal's base-case tables. Anything the
+Sourced values come from the proposal (revised 8 Nov 2026: onsite CCGT, wholesale grid prices). Anything the
 proposal leaves open (hourly arrival shape, wholesale prices, which hours are hot,
 which hours are curtailed) is made-up but stylised data, built here and labelled.
 
@@ -48,11 +48,11 @@ addp!("C", C, "GPUs", "proposal 7.1: 100 MW / 1.7 kW")
 addp!("e", 0.0017, "MW per busy GPU", "proposal 7.1: 120 kW / 72 GPUs")
 addp!("e0", 0.0005, "MW per idle GPU", "proposal 7.1 assumption (~30% of busy)")
 addp!("PUE", 1.15, "-", "proposal 7.1")
-addp!("IG", 235_000.0, "USD/MW-yr", "proposal 7.2: 2,200/kW x CRF 0.102 + 10/kW-yr")
-addp!("cG", 9.45 * 3.75 + 5.70, "USD/MWh", "proposal 7.2: 9.45 MMBtu/MWh x 3.75 + 5.70 VOM")
+addp!("IG", 240_000.0, "USD/MW-yr", "proposal (Nov 8) CCGT: 2,200/kW installed, 16/kW-yr FOM")
+addp!("cG", 6.226 * 3.75 + 3.40, "USD/MWh", "proposal CCGT: 6.226 MMBtu/MWh x 3.75 + 3.40 VOM")
 addp!("alpha_normal", 0.95, "-", "proposal 7.2")
-addp!("alpha_hot", 0.85, "-", "proposal 7.2 (hottest hours)")
-addp!("yG", 2.0, "year", "proposal 7.2")
+addp!("alpha_hot", 0.88, "-", "proposal CCGT (hottest hours)")
+addp!("yG", 4.0, "year", "proposal CCGT: plant available in year 4")
 addp!("Gmax", 250.0, "MW", "proposal 7.2")
 addp!("WACC", 0.08, "-", "proposal model settings")
 addp!("n_years", 15.0, "years", "proposal model settings")
@@ -109,9 +109,10 @@ CSV.write(
 # ---------------------------------------------------------------- hours.csv
 # Made-up wholesale prices: seasonal level + evening-peaking daily shape, weekend dip,
 # scarcity pricing on 3 weekday afternoons of the stress week, and a hot-afternoon
-# spike on one summer weekday. A flat delivery adder is added on top (λ = wholesale + adder).
+# spike on one summer weekday. The revised proposal prices grid power at the hourly
+# wholesale price with no delivery adder, so ADDER = 0 (kept as a sensitivity knob).
 season_level = Dict("winter" => 40.0, "spring" => 30.0, "summer" => 42.0, "fall" => 32.0, "stress" => 55.0)
-const ADDER = 12.0
+const ADDER = 0.0
 
 function wholesale(t)
     h, d, wk = hod(t), dow(t), week(t)
@@ -136,7 +137,7 @@ hours = DataFrame(
     dow = dow.(1:NT),
     w = weight.(1:NT),
     lambda = lam,
-    alpha = [hot(t) ? 0.85 : 0.95 for t in 1:NT],
+    alpha = [hot(t) ? 0.88 : 0.95 for t in 1:NT],
 )
 CSV.write(joinpath(DATA, "hours.csv"), hours)
 

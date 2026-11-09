@@ -10,6 +10,7 @@ onsite gas turbines — under uncertain demand. Julia / JuMP + Gurobi.
 - `src/model.jl` — data loading, extensive-form model, result summaries
 - `scripts/generate_toy_data.jl` — writes the base-case CSVs in `data/` (proposal §7; made-up data where the proposal leaves values open)
 - `scripts/solve_toy.jl` — sanity checks, per-offer optimum, MILP cross-check, turbine-size sweep, VSS; writes `outputs/`
+- `scripts/solve_variant.jl` — what-if runs with different connection years, e.g. `swapped:1:4 both_year1:1:1`; writes `outputs/variant_<tag>/`
 - `scripts/plot_g_sweep.py` — profit vs turbine capacity chart (`outputs/g_sweep.png`)
 - `scripts/make_report.js` — builds `reports/toy_results.docx` from `outputs/`
 - `reports/toy_results.docx` — write-up of the base-case results

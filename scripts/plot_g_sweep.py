@@ -18,7 +18,10 @@ rows = list(csv.DictReader(open(OUT / "g_sweep.csv")))
 summary = {r["offer"]: r for r in csv.DictReader(open(OUT / "offer_summary.csv"))}
 
 fig, ax = plt.subplots(figsize=(7.0, 3.9), dpi=200)
-for k, (label, color) in SERIES.items():
+all_y = [float(r["expected_profit"]) / 1e9 for r in rows]
+lo, hi = min(all_y), max(all_y)
+pad = 0.12 * (hi - lo)
+for i, (k, (label, color)) in enumerate(SERIES.items()):
     pts = sorted((float(r["G_MW"]), float(r["expected_profit"]) / 1e9) for r in rows if r["offer"] == k)
     xs, ys = zip(*pts)
     ax.plot(xs, ys, color=color, lw=2, solid_capstyle="round")
@@ -26,14 +29,14 @@ for k, (label, color) in SERIES.items():
     ax.scatter([gs], [ps], s=60, color=color, edgecolor="white", linewidth=2, zorder=3)
     ax.annotate(
         f"{label}\noptimum G = {gs:.0f} MW, ${ps:.2f}bn",
-        (gs, ps), xytext=(gs + 8, ps + (0.25 if k == "K2" else -0.75)),
+        (gs, ps), xytext=(gs + 8, ps + (0.3 if ps >= max(float(v["expected_profit"]) for v in summary.values()) / 1e9 else -1.6) * pad),
         fontsize=8, color=INK, va="bottom",
     )
 
-ax.set_xlabel("Onsite gas-turbine capacity G (MW)", fontsize=9, color=MUTED)
+ax.set_xlabel("Onsite gas plant (CCGT) capacity G (MW)", fontsize=9, color=MUTED)
 ax.set_ylabel("Expected NPV profit (USD bn)", fontsize=9, color=MUTED)
 ax.set_xlim(0, 250)
-ax.set_ylim(6.5, 12.0)
+ax.set_ylim(lo - 1.5 * pad, hi + 1.5 * pad)
 ax.grid(axis="y", color=GRID, lw=0.8)
 ax.set_axisbelow(True)
 for side in ("top", "right"):

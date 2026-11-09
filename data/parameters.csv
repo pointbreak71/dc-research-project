@@ -3,11 +3,11 @@ C,58800.0,GPUs,proposal 7.1: 100 MW / 1.7 kW
 e,0.0017,MW per busy GPU,proposal 7.1: 120 kW / 72 GPUs
 e0,0.0005,MW per idle GPU,proposal 7.1 assumption (~30% of busy)
 PUE,1.15,-,proposal 7.1
-IG,235000.0,USD/MW-yr,"proposal 7.2: 2,200/kW x CRF 0.102 + 10/kW-yr"
-cG,41.1375,USD/MWh,proposal 7.2: 9.45 MMBtu/MWh x 3.75 + 5.70 VOM
+IG,240000.0,USD/MW-yr,"proposal (Nov 8) CCGT: 2,200/kW installed, 16/kW-yr FOM"
+cG,26.7475,USD/MWh,proposal CCGT: 6.226 MMBtu/MWh x 3.75 + 3.40 VOM
 alpha_normal,0.95,-,proposal 7.2
-alpha_hot,0.85,-,proposal 7.2 (hottest hours)
-yG,2.0,year,proposal 7.2
+alpha_hot,0.88,-,proposal CCGT (hottest hours)
+yG,4.0,year,proposal CCGT: plant available in year 4
 Gmax,250.0,MW,proposal 7.2
 WACC,0.08,-,proposal model settings
 n_years,15.0,years,proposal model settings
