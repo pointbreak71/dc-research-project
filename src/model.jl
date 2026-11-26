@@ -25,7 +25,7 @@ const ROOT = dirname(@__DIR__)
 const GRB_ENV = Ref{Gurobi.Env}()
 grb_env() = (isassigned(GRB_ENV) || (GRB_ENV[] = Gurobi.Env()); GRB_ENV[])
 
-Base.@kwdef struct CaseData
+Base.@kwdef mutable struct CaseData
     K::Vector{String}
     J::Vector{String}
     JU::Vector{String}

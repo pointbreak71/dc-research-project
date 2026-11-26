@@ -1,17 +1,34 @@
 """Re-solve the base case with different grid connection years (what-if runs).
 
-Usage: julia --project=. scripts/solve_variant.jl <tag>:<ycon_K1>:<ycon_K2> [...]
-  e.g. scripts/solve_variant.jl swapped:1:4 both_year1:1:1
-Everything except the offers' connection years is the base case in data/.
+Usage: julia --project=. scripts/solve_variant.jl <tag>:<ycon_K1>:<ycon_K2>[:<H_K2>[:<yG>]] [...]
+  e.g. scripts/solve_variant.jl swapped:1:4 both_year1:1:1 both_year1_H1pct:1:1:87.6
+H_K2 (optional) resets K2's curtailment to that many h/yr, chosen as the highest-price
+hours (same rule as generate_toy_data.jl). yG (optional) sets the plant's first year.
+Everything else is the base case in data/.
 Results go to outputs/variant_<tag>/.
 """
 
 include(joinpath(@__DIR__, "..", "src", "model.jl"))
 using CSV, DataFrames, JuMP, Printf
 
-function run_variant(tag, y1, y2)
+"""Curtail K2 fully in the highest-price hours until the weighted total reaches H h/yr."""
+function set_curtailment!(d, H)
+    cum = 0.0
+    for t in sortperm(d.T; by = t -> d.lambda["K2", t], rev = true)
+        d.E["K2", t] = 0.0
+        if cum + d.wt[t] <= H + 1e-9
+            d.E["K2", t] = 1.0
+            cum += d.wt[t]
+        end
+    end
+    return cum
+end
+
+function run_variant(tag, y1, y2, H = nothing, yG = nothing)
     d = load_case()
     d.ycon["K1"], d.ycon["K2"] = y1, y2
+    H === nothing || @printf("K2 curtailment set to %.1f h/yr\n", set_curtailment!(d, H))
+    yG === nothing || (d.yG = yG)
     out = joinpath(ROOT, "outputs", "variant_$tag")
     mkpath(out)
     println("\n================ $tag: K1 connects year $y1, K2 connects year $y2 ================")
@@ -61,6 +78,7 @@ function run_variant(tag, y1, y2)
 end
 
 for arg in ARGS
-    tag, a, b = split(arg, ":")
-    run_variant(String(tag), parse(Int, a), parse(Int, b))
+    f = split(arg, ":")
+    run_variant(String(f[1]), parse(Int, f[2]), parse(Int, f[3]),
+        length(f) >= 4 ? parse(Float64, f[4]) : nothing, length(f) >= 5 ? parse(Int, f[5]) : nothing)
 end
